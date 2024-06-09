@@ -1,0 +1,22 @@
+# Python bytecode (compiled files)
+__pycache__/
+
+# Environment directory
+venv/
+
+# IDE files
+.idea/
+
+# Logs
+logs/
+
+# Data files
+src/data/
+
+# Endpoints files
+src/endpoints/
+
+# Dependencies
+*.egg-info/
+dist/
+build/
