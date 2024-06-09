@@ -17,6 +17,9 @@ async def process_endpoints_and_save_synthesizer_data(run_scraper: bool = None, 
     synthesizer_endpoints_file_path = "src/endpoints/synthesizer_endpoints/synthesizer_endpoints.csv"
     parsed_data_synth_file_path = "src/data/parsed_synthesizer_data.csv"
 
+    if run_scraper:
+        clear_files(synthesizer_endpoints_file_path, parsed_data_synth_file_path)
+
     # If run_scraper is explicitly set to False, skip the entire scraping process
     if run_scraper is False:
         my_log(message="run_scraper is set to False. Skipping the scraping process.", log_type="info")
@@ -31,10 +34,6 @@ async def process_endpoints_and_save_synthesizer_data(run_scraper: bool = None, 
             return False
     else:
         run_scraper = True
-
-    # Only Clear files if scraper is running
-    # if run_scraper:
-    #     clear_files(synthesizer_endpoints_file_path, parsed_data_synth_file_path)
 
     # Load endpoints from file
     try:
@@ -67,6 +66,13 @@ async def process_endpoints_and_save_synthesizer_data(run_scraper: bool = None, 
         except Exception as e:
             my_log(message=f"Error processing endpoint {endpoint}: {str(e)}", log_type="error")
 
-    await asyncio.gather(*(process_endpoint(endpoint) for endpoint in endpoints))
+    # Limit concurrency to process 10 endpoints at a time
+    semaphore = asyncio.Semaphore(10)
+
+    async def limited_task(endpoint):
+        async with semaphore:
+            await process_endpoint(endpoint)
+
+    await asyncio.gather(*(limited_task(endpoint) for endpoint in endpoints))
 
     return True
