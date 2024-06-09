@@ -11,8 +11,6 @@ initialize_logging()
 
 def create_timestamp():
     return time.strftime('%Y-%m-%d %H:%M:%S')
-
-
 @handle_exceptions
 async def parse_and_save_data(page_content: str, data_file: str):
     if not page_content:
